@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسجيل خبير | منصة التحكيم</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .register-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        h2 { color: #2b6cb0; text-align: center; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #4a5568; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+        .file-upload {
+            border: 2px dashed #cbd5e0;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #718096;
+            margin-top: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #2b6cb0;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover { background: #1e4e8c; }
+    </style>
+</head>
+<body>
+
+<div class="register-container">
+    <h2>انضم كخبير أو محكم</h2>
+    <form id="expertRegisterForm" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>الاسم الكامل</label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+            <label>البريد الإلكتروني</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label>كلمة المرور</label>
+            <input type="password" id="password" required>
+        </div>
+        <div class="form-group">
+            <label>التخصص</label>
+            <input type="text" id="specialty" placeholder="مثال: قانون تجاري، تحكيم دولي..." required>
+        </div>
+        <div class="form-group">
+            <label>رفع ملف السيرة الذاتية / الخبرات</label>
+            <input type="file" id="cvFile" name="cvFile" accept=".pdf,.doc,.docx" required>
+            <small style="color: #a0aec0;">ملفات PDF أو Word فقط</small>
+        </div>
+        <button type="submit">إرسال طلب الانضمام</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('expertRegisterForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData();
+        formData.append('name', document.getElementById('name').value);
+        formData.append('email', document.getElementById('email').value);
+        formData.append('password', document.getElementById('password').value);
+        formData.append('specialty', document.getElementById('specialty').value);
+        formData.append('cvFile', document.getElementById('cvFile').files[0]);
+
+        try {
+            const response = await fetch('http://localhost:3000/register-expert', {
+                method: 'POST',
+                body: formData // ملاحظة: لا تضع Content-Type مع FormData
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                alert('تم تقديم طلبك بنجاح! سيقوم المدير بمراجعته.');
+                window.location.href = 'index.html';
+            } else {
+                alert('خطأ: ' + data.error);
+            }
+        } catch (err) {
+            alert('حدث خطأ في الاتصال بالسيرفر');
+        }
+    });
+</script>
+</body>
+</html>
