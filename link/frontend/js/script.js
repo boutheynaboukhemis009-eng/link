@@ -1,115 +1,154 @@
 /**
- * 1. تهيئة الأحداث (Event Listeners) وحماية الصفحات
+ * 1. مدير التحميل الذكي (Application Initialization)
  */
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // حماية صفحات الداشبورد
     const currentPath = window.location.pathname;
-    const isLoggedIn = localStorage.getItem('isLoggedIn'); 
 
+    // A. الحماية المركزية لصفحات الداشبورد
     if (currentPath.includes('-dashboard.html')) {
-        if (isLoggedIn !== 'true') {
+        const userRole = localStorage.getItem('userRole');
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        const allowedRoles = ['admin', 'company', 'client', 'expert'];
+
+        if (isLoggedIn !== 'true' || !allowedRoles.includes(userRole)) {
             alert('يرجى تسجيل الدخول أولاً للوصول إلى لوحة التحكم!');
-            window.location.href = 'login.html'; 
-            return; 
+            window.location.href = 'login.html';
+            return;
         }
     }
 
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
-    const applyNowBtn = document.getElementById('applyNowBtn'); 
+    // B. ربط الأحداث (Event Listeners)
+    setupEventListeners();
 
-    if (loginForm) loginForm.addEventListener('submit', (e) => handleFormSubmit(e, 'login'));
-    if (registerForm) registerForm.addEventListener('submit', (e) => handleFormSubmit(e, 'register'));
-    
-    const addExpertForm = document.getElementById('addExpertForm');
-    if (addExpertForm) addExpertForm.addEventListener('submit', (e) => handleFormSubmit(e, 'add-expert'));
-
-    // ربط حدث زر تسجيل الخروج بشكل آمن ومحدد
-   // استهداف كافة الأزرار التي تحمل كلاس logout-btn
-document.querySelectorAll('.logout-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // مسح بيانات الجلسة بالكامل
-        localStorage.clear();
-        sessionStorage.clear();
-
-        alert('تم تسجيل الخروج بنجاح.');
-        
-        // التوجيه إلى الصفحة الرئيسية
-        window.location.href = 'index.html';
-    });
+    // C. تحميل الدوال المشروط (Lazy Loading)
+    initPageLoad();
 });
 
-    const serviceTypeInput = document.getElementById('serviceTypeInput');
-    if (serviceTypeInput) {
-        const selectedService = sessionStorage.getItem('selectedServiceName');
-        if (selectedService) {
-            serviceTypeInput.value = selectedService; 
-        } else if (currentPath.includes('fill-service-data.html')) {
-            alert('يرجى اختيار خدمة أولاً');
-            window.location.href = "/service.html";
-        }
-    }
+/**
+ * دالة تهيئة الأحداث (التفاعلات)
+ */
+function setupEventListeners() {
+    // 1. النماذج (Forms)
+    const forms = { 'loginForm': 'login', 'registerForm': 'register', 'addExpertForm': 'add-expert' };
+    Object.keys(forms).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('submit', (e) => handleFormSubmit(e, forms[id]));
+    });
 
+    // 2. زر تسجيل الخروج
+    document.querySelectorAll('.logout-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.clear(); sessionStorage.clear();
+            alert('تم تسجيل الخروج بنجاح.');
+            window.location.href = 'index.html';
+        });
+    });
+
+    // 3. زر طلب الخدمة (المحسن)
+    const applyNowBtn = document.getElementById('applyNowBtn');
     if (applyNowBtn) {
         applyNowBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const userRole = localStorage.getItem('userRole'); 
+            const originalText = applyNowBtn.innerText;
+            applyNowBtn.innerText = "جاري التحقق...";
+            applyNowBtn.style.opacity = "0.7";
+            applyNowBtn.disabled = true;
 
-            if (localStorage.getItem('isLoggedIn') !== 'true') {
-                window.location.href = 'register.html';
-            } else {
-                switch (userRole) {
-                    case 'admin': window.location.href = 'admin-dashboard.html'; break;
-                    case 'company': window.location.href = 'client-dashboard.html'; break;
-                    case 'expert': window.location.href = 'expert-dashboard.html'; break;
-                    default: window.location.href = 'login.html'; break;
+            setTimeout(() => {
+                const userRole = localStorage.getItem('userRole');
+                if (localStorage.getItem('isLoggedIn') !== 'true') {
+                    window.location.href = 'register.html';
+                } else {
+                    const paths = { 'admin': 'admin-dashboard.html', 'company': 'client-dashboard.html', 'client': 'client-dashboard.html', 'expert': 'expert-dashboard.html' };
+                    window.location.href = paths[userRole] || 'login.html';
                 }
-            }
+            }, 0);
         });
     }
 
-    fetchAndDisplayUserInfo();
-    loadUserData();
-    loadExpertsList();
-    loadClientOrders();
-    loadAdminOrders();
-    loadExpertRequests();
+    // 4. معالجة نموذج التقييم
     const feedbackForm = document.getElementById('feedbackForm');
+    if (feedbackForm) feedbackForm.addEventListener('submit', handleFeedbackSubmit);
+}
+
+/**
+ * دالة التحميل الذكي حسب المسار (تمنع الأخطاء في الصفحات)
+ */
+/**
+ * دالة التحميل الذكي حسب المسار
+ */
+async function initPageLoad() {
+    const path = window.location.pathname;
+
+    // --- تحديث كود الأسعار هنا ---
+    if (path.includes('fill-service-data.html')) {
+    const servicePrices = {
+        "التحكيم التجاري": 500000,
+        "وساطة": 20000,
+        "استشارة": 2000,
+        "نسخة من الاحكام": 5000,
+        "تحرير عريضة": 5000,
+        "ورشات تكوينية": 15000,
+        "خلية متابعة": 10000,
+        "الاشهارات القانونية": 50000,
+         "عقود": 60000
+    };
+
+    const serviceName = sessionStorage.getItem('selectedServiceName');
+    console.log("الاسم المجلوب من التخزين:", serviceName); // <--- سيظهر لك في الـ Console
     
-    if (feedbackForm) { // هذا الشرط يمنع ظهور خطأ null
-        feedbackForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // جلب البيانات
-            const data = {
-                rating: document.getElementById('rating').value,
-                serviceFeedback: document.getElementById('serviceFeedback').value,
-                suggestions: document.getElementById('suggestions').value
-            };
+    const priceInput = document.getElementById('servicePrice');
+    const depositDisplay = document.getElementById('depositAmountDisplay');
+    
+    if (serviceName && servicePrices[serviceName]) {
+    const price = servicePrices[serviceName];
+    
+    // حساب العربون (ثلث السعر)
+    const deposit = Math.round(price / 3); 
+    
+    // تحديث خانة السعر الكلي
+    if (priceInput) priceInput.value = price;
+    
+    // تحديث قيمة العربون في الصفحة
+    const depositDisplay = document.getElementById('depositAmountDisplay');
+    if (depositDisplay) depositDisplay.innerText = deposit;
+    
+    // تحديث قيمة العربون داخل الـ FormData (إذا كنت تريد إرسالها للسيرفر)
+    // لاحظ أنك قمت سابقاً بإضافة العربون في دالة Submit، تأكد من استخدام نفس المنطق
+    console.log("السعر:", price, "العربون:", deposit);
+}
+    } else {
+        console.error("خطأ: اسم الخدمة غير موجود في القائمة أو غير مخزن!");
+    }
+}
+    // ----------------------------
 
-            // إرسال البيانات
-            const response = await fetch('http://localhost:3000/submit-feedback', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+    // باقي الدوال الخاصة بك كما هي...
+    if (typeof fetchAndDisplayUserInfo === 'function') fetchAndDisplayUserInfo();
+    if (typeof loadUserData === 'function') loadUserData();
+    
+    // 3. الدوال الخاصة بكل صفحة (نستخدم هنا متغير path المعرف في الأعلى)
+    // 3. الدوال الخاصة بكل صفحة
+// لاحظ أننا استبدلنا (path) بـ (window.location.pathname) مباشرة
+if (window.location.pathname.includes('admin-dashboard.html')) {
+    if (typeof loadAdminOrders === 'function') loadAdminOrders();
+    if (typeof loadExpertRequests === 'function') loadExpertRequests();
+    if (typeof loadFeedback === 'function') loadFeedback();
+}
 
-            if (response.ok) {
-                alert('شكراً لك على تقييمك ومساهمتك في تطوير المنصة!');
-                feedbackForm.reset();
-            }
-        });
-    }
-    if (typeof loadContactMessages === 'function') {
-        loadContactMessages();
-    }
-    if (typeof loadFeedback === 'function') {
-        loadFeedback();
-    }
-});
+if (window.location.pathname.includes('client-dashboard.html')) {
+    if (typeof loadClientOrders === 'function') loadClientOrders();
+}
+
+if (window.location.pathname.includes('experts.html') || window.location.pathname.includes('service.html')) {
+    if (typeof loadExpertsList === 'function') loadExpertsList();
+}
+
+
+
+// [هنا ضع باقي الدوال الخاصة بك: handleFormSubmit, gatherFormData, loadClientOrders, etc...]
+// (بما أن الكود طويل، احتفظ بالدوال التي أرسلتها من رقم 2 إلى 17 كما هي في أسفل هذا الملف)
 
 /**
  * 2. مدير الطلبات (Request Handler)
@@ -149,8 +188,16 @@ function validateForm(data) {
     if (password.length < 6) { alert('كلمة المرور يجب أن تكون 6 خانات على الأقل.'); return false; }
     if (data.phone && !/^\d{10}$/.test(data.phone)) { alert('يرجى إدخال رقم هاتف صحيح مكون من 10 أرقام.'); return false; }
     if (data.role === 'admin' && !data.adminCode) { alert('يجب إدخال كود المدير!'); return false; }
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s+/g, '');
+    if (cardNumber.length !== 16 || isNaN(cardNumber)) {
+        alert('خطأ: رقم البطاقة يجب أن يتكون من 16 رقماً صحيحاً.');
+        return false;
+    }
+
     return true;
 }
+    
+
 
 /**
  * 3. وحدة جمع البيانات (Data Collector)
@@ -271,33 +318,58 @@ document.addEventListener('click', (e) => {
     }
 });
 
+
 /**
- * 9. معالجة نموذج طلب الخدمة المطور
+ * 9. معالجة نموذج طلب الخدمة المطور (تحديث لإضافة السعر)
  */
 document.addEventListener('submit', async (e) => {
     if (e.target && e.target.id === 'secureServiceOrderForm') {
         e.preventDefault();
+        
         const formData = new FormData();
         formData.append('serviceType', document.getElementById('serviceTypeInput').value);
         formData.append('clientName', document.getElementById('clientName').value);
         formData.append('requestDetails', document.getElementById('requestDetails').value);
         formData.append('userEmail', localStorage.getItem('userEmail'));
         formData.append('cardNumber', document.getElementById('cardNumber').value);
-        formData.append('depositAmount', '250'); 
+        
+        // هنا نقوم بجلب السعر من الخانة الجديدة
+       // داخل دالة document.addEventListener('submit', ...)
+// بدلاً من جعل العربون يساوي السعر، استخدم الحساب:
+
+const price = parseInt(document.getElementById('servicePrice').value);
+const depositAmount = Math.round(price / 3); // حساب ثلث السعر
+
+formData.append('price', price);
+formData.append('depositAmount', depositAmount); // إرسال الثلث للسيرفر
+        
         const fileInput = document.getElementById('serviceFiles');
         if (fileInput && fileInput.files.length > 0) {
-            for (let i = 0; i < fileInput.files.length; i++) { formData.append('attachments', fileInput.files[i]); }
+            for (let i = 0; i < fileInput.files.length; i++) { 
+                formData.append('attachments', fileInput.files[i]); 
+            }
         }
+
         try {
-            const response = await fetch('http://localhost:3000/submit-service-order', { method: 'POST', body: formData });
+            const response = await fetch('http://localhost:3000/submit-service-order', { 
+                method: 'POST', 
+                body: formData 
+            });
+            
             if (response.ok) {
-                alert('تم تقديم الطلب بنجاح.');
+                alert('تم تقديم طلبك بنجاح!');
                 sessionStorage.removeItem('selectedServiceName');
                 window.location.href = 'client-dashboard.html';
+            } else {
+                const errorData = await response.json();
+                alert('خطأ: ' + (errorData.message || 'فشل تقديم الطلب'));
             }
-        } catch (error) { alert("خطأ في الاتصال"); }
+        } catch (error) { 
+            alert("خطأ في الاتصال بالسيرفر"); 
+        }
     }
 });
+
 
 /**
  * 10. وظائف جلب البيانات (اسم المستخدم)
@@ -396,18 +468,20 @@ async function loadClientOrders() {
             return;
         }
 
-        container.innerHTML = orders.map(order => {
-            // منطق تلوين حالة الطلب
-            const statusColor = order.status === 'مكتمل' ? '#28a745' : '#ffc107';
+      container.innerHTML = orders.map(order => {
+            // تنسيق التاريخ (إذا كان متاحاً في كائن الطلب)
+            const date = order.created_at ? new Date(order.created_at).toLocaleDateString('ar-DZ') : '---';
+            
             return `
-                <tr style="transition: background 0.3s;">
-                    <td style="padding: 15px;">#${order.id}</td>
-                    <td style="font-weight:600;">${order.service_type}</td>
-                    <td style="color: #666;">${order.request_details.substring(0, 40)}...</td>
-                    <td><span style="background:${statusColor}22; color:${statusColor}; padding:5px 10px; border-radius:15px; font-size:0.85em; font-weight:bold;">${order.status || 'قيد المراجعة'}</span></td>
-                    <td style="color: #007bff; font-weight: bold;">${order.deposit_amount} DA</td>
+                <tr>
+                    <td>#${order.id}</td>
+                    <td>${order.service_type}</td>
+                    <td style="color: #666;">${order.request_details ? order.request_details.substring(0, 40) : ''}...</td>
+                    <td style="font-weight: bold; color: #2b6cb0;">${order.deposit_amount} دج</td>
+                    <td style="color: #718096;">${date}</td>
                 </tr>
             `;
+
         }).join('');
     } catch (err) { console.error("خطأ في جلب طلبات العميل:", err); }
 }
@@ -424,10 +498,12 @@ async function loadAdminOrders() {
         const orders = await response.json();
         
         container.innerHTML = orders.map(order => {
+            // تجهيز رابط الملفات
             const fileLink = order.attachments 
-                ? `<a href="http://localhost:3000/uploads/${order.attachments.split(',')[0]}" target="_blank" style="color: #007bff; text-decoration:none; font-weight:bold;">📄 عرض الملف</a>` 
+                ? `<a href="http://localhost:3000/uploads/${order.attachments.split(',')[0]}" target="_blank" style="color: #007bff; text-decoration:none; font-weight:bold;">📄 عرض</a>` 
                 : '<span style="color:#ccc;">لا يوجد</span>';
 
+            // الترتيب: رقم، مقدم، نوع، تفاصيل، مستندات، رسوم، حالة
             return `
                 <tr style="border-bottom: 1px solid #eee;">
                     <td style="padding: 15px;">#${order.id}</td>
@@ -436,6 +512,7 @@ async function loadAdminOrders() {
                         <small style="color: #888;">${order.user_email}</small>
                     </td>
                     <td>${order.service_type}</td>
+                    <td style="color: #666;">${order.request_details ? order.request_details.substring(0, 30) : ''}...</td>
                     <td>${fileLink}</td>
                     <td style="font-weight: bold;">${order.deposit_amount} DA</td>
                     <td>
