@@ -128,7 +128,7 @@ async function handleFormSubmit(e, type) {
     }
     
     try {
-        const response = await fetch(`fetch(API_URL + '/${type}`, {
+        const response = await fetch(`fetch(API_URL + /${type}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
