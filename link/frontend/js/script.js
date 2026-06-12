@@ -1,4 +1,7 @@
-
+// أضف هذا في بداية ملف script.js
+const API_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:3000' 
+    : 'https://link-p08u.onrender.com'; // ضع هنا رابط السيرفر الخاص بك على Render
 /**
  * 1. مدير التحميل الذكي (Application Initialization)
  */
@@ -125,7 +128,7 @@ async function handleFormSubmit(e, type) {
     }
     
     try {
-        const response = await fetch(`http://localhost:3000/${type}`, {
+        const response = await fetch(`fetch(API_URL + '/${type}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
@@ -203,7 +206,7 @@ async function fetchAndDisplayUserInfo() {
     const email = localStorage.getItem('userEmail');
     if (!userNameElement || !email) return;
     try {
-        const response = await fetch(`http://localhost:3000/user-info?email=${encodeURIComponent(email)}`);
+        const response = await fetch(`fetch(API_URL + '/user-info?email=${encodeURIComponent(email)}`);
         if (!response.ok) return;
         const user = await response.json();
         userNameElement.innerText = user.name || "مستخدم";
@@ -213,7 +216,7 @@ async function fetchAndDisplayUserInfo() {
 
 async function fetchAdminStats() {
     try {
-        const response = await fetch('http://localhost:3000/admin-stats');
+        const response = await fetch('fetch(API_URL + /admin-stats');
         const data = await response.json();
         const element = document.getElementById('userCount');
         if (element) element.innerText = data.totalUsers;
@@ -316,7 +319,7 @@ document.addEventListener('submit', async (e) => {
         }
 
         try {
-            const response = await fetch('http://localhost:3000/submit-service-order', { 
+            const response = await fetch('fetch(API_URL + /submit-service-order', { 
                 method: 'POST', 
                 body: formData 
             });
@@ -353,7 +356,7 @@ async function loadExpertsList() {
     if (!container) return;
 
     try {
-        const response = await fetch('http://localhost:3000/get-experts');
+        const response = await fetch('fetch(API_URL + /get-experts');
         if (!response.ok) return;
         const experts = await response.json();
 
@@ -395,7 +398,7 @@ async function loadClientOrders() {
 
     const email = localStorage.getItem('userEmail');
     try {
-        const response = await fetch(`http://localhost:3000/get-client-orders?email=${encodeURIComponent(email)}`);
+        const response = await fetch(`fetch(API_URL + '/get-client-orders?email=${encodeURIComponent(email)}`);
         const orders = await response.json();
         if (orders.length === 0) {
             container.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">لا توجد طلبات حالياً.</td></tr>`;
@@ -415,10 +418,10 @@ async function loadAdminOrders() {
     const container = document.getElementById('adminOrdersTableBody');
     if (!container) return;
     try {
-        const response = await fetch('http://localhost:3000/get-all-orders');
+        const response = await fetch('fetch(API_URL + /get-all-orders');
         const orders = await response.json();
         container.innerHTML = orders.map(order => {
-            const fileLink = order.attachments ? `<a href="http://localhost:3000/uploads/${order.attachments.split(',')[0]}" target="_blank" style="color: #007bff; text-decoration:none; font-weight:bold;">📄 عرض</a>` : '<span style="color:#ccc;">لا يوجد</span>';
+            const fileLink = order.attachments ? `<a href="fetch(API_URL + '/uploads/${order.attachments.split(',')[0]}" target="_blank" style="color: #007bff; text-decoration:none; font-weight:bold;">📄 عرض</a>` : '<span style="color:#ccc;">لا يوجد</span>';
             return `
                 <tr style="border-bottom: 1px solid #eee;">
                     <td style="padding: 15px;">#${order.id}</td>
@@ -442,7 +445,7 @@ async function loadAdminOrders() {
 
 async function updateOrderStatus(orderId, newStatus) {
     try {
-        await fetch('http://localhost:3000/update-order-status', {
+        await fetch('fetch(API_URL + /update-order-status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id: orderId, status: newStatus })
@@ -458,7 +461,7 @@ async function submitExpertRequest() {
     const email = localStorage.getItem('userEmail');
     const expertName = localStorage.getItem('userName');
     try {
-        const response = await fetch('http://localhost:3000/submit-expert-request', {
+        const response = await fetch('fetch(API_URL + /submit-expert-request', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, expertName })
@@ -475,7 +478,7 @@ async function loadExpertRequests() {
     const container = document.getElementById('expertRequestsTableBody');
     if (!container) return;
     try {
-        const response = await fetch('http://localhost:3000/get-expert-requests');
+        const response = await fetch('fetch(API_URL + /get-expert-requests');
         const requests = await response.json();
         container.innerHTML = requests.map(req => `
             <tr style="border-bottom: 1px solid #ddd;">
@@ -491,7 +494,7 @@ async function loadExpertRequests() {
 
 async function approveExpert(requestId, email) {
     try {
-        const response = await fetch('http://localhost:3000/approve-expert', {
+        const response = await fetch('fetch(API_URL + /approve-expert', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ requestId, email })
@@ -510,7 +513,7 @@ async function loadFeedback() {
     const container = document.getElementById('feedbackTableBody');
     if (!container) return;
     try {
-        const response = await fetch('http://localhost:3000/get-feedback');
+        const response = await fetch('fetch(API_URL + /get-feedback');
         if (!response.ok) throw new Error('فشل الاتصال');
         const feedbackList = await response.json();
         container.innerHTML = feedbackList.map(item => `
@@ -535,5 +538,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-
