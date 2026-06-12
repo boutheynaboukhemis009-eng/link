@@ -15,7 +15,11 @@ const app = express();
 /**
  * 2. إعدادات الـ Middleware
  */
-app.use(cors());
+app.use(cors({
+    origin: 'https://link-p08u.onrender.com', // هذا الرابط هو الذي سيتصل بالسيرفر
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+    }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
