@@ -271,17 +271,37 @@ function showSection(sectionId) {
 /**
  * 8. منطق زر "طلب الخدمة"
  */
+/**
+ * 8. منطق زر "طلب الخدمة" (المعدل)
+ */
 document.addEventListener('click', (e) => {
     if (e.target && e.target.classList.contains('service-request-btn')) {
         e.preventDefault();
+        
         const serviceName = e.target.getAttribute('data-service-name');
         if (serviceName) {
             sessionStorage.setItem('selectedServiceName', serviceName);
         }
+
+        // التحقق من حالة تسجيل الدخول
         if (localStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = '/fill-service-data.html';
+            const userRole = localStorage.getItem('userRole');
+            
+            // بدلاً من التوجه للخدمة مباشرة، نوجه المستخدم للداشبورد الخاص به
+            // لأنه مسجل دخوله مسبقاً
+            const paths = { 
+                'admin': 'admin-dashboard.html', 
+                'company': 'client-dashboard.html', 
+                'client': 'client-dashboard.html', 
+                'expert': 'expert-dashboard.html' 
+            };
+            
+            alert('أنت مسجل دخول بالفعل، سيتم تحويلك إلى لوحة التحكم الخاصة بك.');
+            window.location.href = paths[userRole] || 'login.html';
             return;
         }
+
+        // في حال لم يكن مسجلاً
         const wantsToJoinAsExpert = confirm("هل تود التسجيل كخبير/محكم في منصتنا؟\n\n- اضغط 'موافق' للذهاب لصفحة تسجيل الخبراء.\n- اضغط 'إلغاء' للتسجيل كعميل عادي.");
         if (wantsToJoinAsExpert) {
             window.location.href = '/register-expert.html';
