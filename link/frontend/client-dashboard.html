@@ -85,15 +85,44 @@
     <script src="js/script.js"></script>
     
 <script>
+    
     document.addEventListener('DOMContentLoaded', () => {
-        protectPage(['admin']);
-        fetchAdminStats();
+        // 1. الحماية: السماح للأدمن، العميل (company)، والعميل (client)
+        const userRole = localStorage.getItem('userRole');
+        const allowedRoles = ['admin', 'company', 'client'];
+
+        if (!allowedRoles.includes(userRole)) {
+            alert('ليس لديك صلاحية للوصول إلى هذه الصفحة');
+            window.location.href = 'login.html';
+            return; // إيقاف تنفيذ باقي الكود
+        }
+
+        // 2. تحميل البيانات بناءً على الصلاحيات فقط
+        if (userRole === 'admin') {
+            if (typeof fetchAdminStats === 'function') fetchAdminStats();
+            if (typeof loadAdminOrders === 'function') loadAdminOrders();
+        }
         
-        // تحميل البيانات الأساسية
-        if (typeof loadAdminOrders === 'function') loadAdminOrders();
+        // الآن كلاً من company و client سيتمكنان من تحميل طلباتهما
+        if (userRole === 'company' || userRole === 'client') {
+            if (typeof loadClientOrders === 'function') loadClientOrders();
+        }
+
+        // 3. تحميل الوظائف العامة
         if (typeof loadExpertRequests === 'function') loadExpertRequests();
         if (typeof loadFeedback === 'function') loadFeedback();
+
+        // 4. تحسين استجابة زر طلب الخدمة
+        const applyNowBtn = document.querySelector('.btn-request-service');
+        if (applyNowBtn) {
+            applyNowBtn.addEventListener('click', (e) => {
+                applyNowBtn.innerText = "جاري الانتقال...";
+                applyNowBtn.style.opacity = "0.7";
+                applyNowBtn.style.pointerEvents = "none";
+            });
+        }
     });
+
 </script>
 </body>
 </html>
