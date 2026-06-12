@@ -1,77 +1,67 @@
 /**
  * 1. مدير التحميل الذكي (Application Initialization)
  */
-document.addEventListener('DOMContentLoaded', () => {
-    const currentPath = window.location.pathname;
-
-    // A. الحماية المركزية لصفحات الداشبورد
-    if (currentPath.includes('-dashboard.html')) {
-        const userRole = localStorage.getItem('userRole');
-        const isLoggedIn = localStorage.getItem('isLoggedIn');
-        const allowedRoles = ['admin', 'company', 'client', 'expert'];
-
-        if (isLoggedIn !== 'true' || !allowedRoles.includes(userRole)) {
-            alert('يرجى تسجيل الدخول أولاً للوصول إلى لوحة التحكم!');
-            window.location.href = 'login.html';
-            return;
-        }
-    }
-
-    // B. ربط الأحداث (Event Listeners)
-    setupEventListeners();
-
-    // C. تحميل الدوال المشروط (Lazy Loading)
-    initPageLoad();
-});
-
 /**
- * دالة تهيئة الأحداث (التفاعلات)
+ * دالة تهيئة الأحداث (التفاعلات) - نسخة محمية
  */
 function setupEventListeners() {
-    // 1. النماذج (Forms)
-    const forms = { 'loginForm': 'login', 'registerForm': 'register', 'addExpertForm': 'add-expert' };
+    // 1. النماذج (Forms) - تم إضافة فحص if (el) لتجنب خطأ null
+    const forms = { 
+        'loginForm': 'login', 
+        'registerForm': 'register', 
+        'addExpertForm': 'add-expert' 
+    };
+
     Object.keys(forms).forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('submit', (e) => handleFormSubmit(e, forms[id]));
+        // التعديل هنا: نربط الحدث فقط إذا كان العنصر موجوداً في الصفحة الحالية
+        if (el) {
+            el.addEventListener('submit', (e) => handleFormSubmit(e, forms[id]));
+        }
     });
 
     // 2. زر تسجيل الخروج
     document.querySelectorAll('.logout-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            localStorage.clear(); sessionStorage.clear();
+            localStorage.clear(); 
+            sessionStorage.clear();
             alert('تم تسجيل الخروج بنجاح.');
             window.location.href = 'index.html';
         });
     });
 
-    // 3. زر طلب الخدمة (المحسن)
+    // 3. زر طلب الخدمة
     const applyNowBtn = document.getElementById('applyNowBtn');
     if (applyNowBtn) {
         applyNowBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            const originalText = applyNowBtn.innerText;
+            // إضافة حماية للزر لضمان أنه موجود
             applyNowBtn.innerText = "جاري التحقق...";
             applyNowBtn.style.opacity = "0.7";
             applyNowBtn.disabled = true;
 
-            setTimeout(() => {
-                const userRole = localStorage.getItem('userRole');
-                if (localStorage.getItem('isLoggedIn') !== 'true') {
-                    window.location.href = 'register.html';
-                } else {
-                    const paths = { 'admin': 'admin-dashboard.html', 'company': 'client-dashboard.html', 'client': 'client-dashboard.html', 'expert': 'expert-dashboard.html' };
-                    window.location.href = paths[userRole] || 'login.html';
-                }
-            }, 0);
+            const userRole = localStorage.getItem('userRole');
+            if (localStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'register.html';
+            } else {
+                const paths = { 
+                    'admin': 'admin-dashboard.html', 
+                    'company': 'client-dashboard.html', 
+                    'client': 'client-dashboard.html', 
+                    'expert': 'expert-dashboard.html' 
+                };
+                window.location.href = paths[userRole] || 'login.html';
+            }
         });
     }
 
     // 4. معالجة نموذج التقييم
     const feedbackForm = document.getElementById('feedbackForm');
-    if (feedbackForm) feedbackForm.addEventListener('submit', handleFeedbackSubmit);
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', handleFeedbackSubmit);
+    }
 }
-
 /**
  * دالة التحميل الذكي حسب المسار (تمنع الأخطاء في الصفحات)
  */
@@ -154,10 +144,22 @@ if (window.location.pathname.includes('experts.html') || window.location.pathnam
  * 2. مدير الطلبات (Request Handler)
  */
 async function handleFormSubmit(e, type) {
-    e.preventDefault();
+    // 1. منع الحدث الافتراضي لمنع إعادة تحميل الصفحة
+    e.preventDefault(); 
+    e.stopImmediatePropagation(); 
+
+    console.log("محاولة إرسال نموذج من نوع:", type);
+
+    // 2. جمع البيانات
     const formData = gatherFormData(type);
-    if (type === 'register' && !validateForm(formData)) return;
     
+    // 3. التحقق (إذا كان تسجيل)
+    if (type === 'register' && !validateForm(formData)) {
+        console.warn("فشل التحقق من البيانات");
+        return; 
+    }
+    
+    // 4. إرسال الطلب
     try {
         const response = await fetch(`http://localhost:3000/${type}`, {
             method: 'POST',
@@ -165,16 +167,18 @@ async function handleFormSubmit(e, type) {
             body: JSON.stringify(formData)
         });
 
+        // 5. قراءة الرد
         const data = await response.json();
 
         if (response.ok) {
             handleSuccess(type, data);
         } else {
-            alert(data.error || 'حدث خطأ ما');
+            alert(data.error || 'حدث خطأ في السيرفر');
         }
     } catch (error) {
+        // إذا ظهر هذا التنبيه، فالمشكلة في عنوان السيرفر أو أن السيرفر متوقف
         console.error("خطأ في الاتصال بالسيرفر:", error);
-        alert("لا يمكن الاتصال بالسيرفر.");
+        alert("لا يمكن الاتصال بالسيرفر. يرجى التأكد من تشغيل Node.js على المنفذ 3000.");
     }
 }
 
@@ -182,23 +186,41 @@ async function handleFormSubmit(e, type) {
  * وحدة التحقق من المدخلات (Validation Module)
  */
 function validateForm(data) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirmPassword').value;
-    if (password !== confirmPassword) { alert('خطأ: كلمة المرور غير متطابقة!'); return false; }
-    if (password.length < 6) { alert('كلمة المرور يجب أن تكون 6 خانات على الأقل.'); return false; }
-    if (data.phone && !/^\d{10}$/.test(data.phone)) { alert('يرجى إدخال رقم هاتف صحيح مكون من 10 أرقام.'); return false; }
-    if (data.role === 'admin' && !data.adminCode) { alert('يجب إدخال كود المدير!'); return false; }
-    const cardNumber = document.getElementById('cardNumber').value.replace(/\s+/g, '');
-    if (cardNumber.length !== 16 || isNaN(cardNumber)) {
-        alert('خطأ: رقم البطاقة يجب أن يتكون من 16 رقماً صحيحاً.');
-        return false;
+    // 1. التحقق من تطابق كلمات المرور (إذا كانت الحقول موجودة)
+    const password = document.getElementById('password')?.value;
+    const confirmPassword = document.getElementById('confirmPassword')?.value;
+    if (password && confirmPassword && password !== confirmPassword) { 
+        alert('خطأ: كلمة المرور غير متطابقة!'); return false; 
+    }
+    
+    // 2. التحقق من طول كلمة المرور
+    if (password && password.length < 6) { 
+        alert('كلمة المرور يجب أن تكون 6 خانات على الأقل.'); return false; 
+    }
+
+    // 3. التحقق من رقم الهاتف
+    if (data.phone && !/^\d{10}$/.test(data.phone)) { 
+        alert('يرجى إدخال رقم هاتف صحيح مكون من 10 أرقام.'); return false; 
+    }
+
+    // 4. التحقق من كود المدير
+    if (data.role === 'admin' && !data.adminCode) { 
+        alert('يجب إدخال كود المدير!'); return false; 
+    }
+
+    // --- هنا التعديل الجوهري ---
+    // لا نتحقق من رقم البطاقة إلا إذا كنا في صفحة ملء بيانات الخدمة
+    const cardNumberEl = document.getElementById('cardNumber');
+    if (cardNumberEl) {
+        const cardNumber = cardNumberEl.value.replace(/\s+/g, '');
+        if (cardNumber.length !== 16 || isNaN(cardNumber)) {
+            alert('خطأ: رقم البطاقة يجب أن يتكون من 16 رقماً صحيحاً.');
+            return false;
+        }
     }
 
     return true;
 }
-    
-
-
 /**
  * 3. وحدة جمع البيانات (Data Collector)
  */
@@ -632,3 +654,14 @@ async function loadFeedback() {
         console.error("خطأ في جلب التقييمات:", err); 
     }
 }
+// أضف هذا الجزء في نهاية ملف السكربت، تأكد من عدم وضعه داخل أي دالة أخرى
+document.addEventListener('DOMContentLoaded', () => {
+    const regForm = document.getElementById('registerForm');
+    
+    if (regForm) {
+        regForm.addEventListener('submit', (e) => {
+            console.log("تم اعتراض عملية الإرسال بنجاح!"); // للتأكد أننا أمسكنا بالنموذج
+            handleFormSubmit(e, 'register');
+        });
+    }
+});
