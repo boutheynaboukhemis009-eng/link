@@ -297,8 +297,9 @@ app.get('/get-feedback', (req, res) => {
 });
 
 
-app.listen(PORT, () => {
-    console.log(`السيرفر يعمل الآن على الرابط: http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3000; // هذا يقرأ المنفذ من السيرفر أو يستخدم 3000 محلياً
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`السيرفر يعمل الآن على المنفذ: ${PORT}`);
 });
 
 
