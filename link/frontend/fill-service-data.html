@@ -48,17 +48,30 @@
         </div>
 
         <!-- القسم الثالث: الاعتماد المالي -->
-        <div class="section-title">ثالثاً: جدية الطلب والاعتماد المالي</div>
-        <div class="payment-box">
-            <p style="margin: 0 0 10px 0; font-weight: bold; color: #2c5282;">يتطلب تأكيد هذا الطلب دفع عربون جدية مسترد في حال رفض الطلب.</p>
-            <p style="font-size: 1.2rem; margin: 0 0 15px 0; color: #2d3748;">قيمة العربون المستحق: <strong style="color: #e53e3e;">250DAs</strong></p>
-            
-            <div class="form-group" style="margin-bottom: 0;">
-                <label for="cardNumber">رقم بطاقة الدفع (Mada / Visa / Mastercard):</label>
-                <input type="text" id="cardNumber" placeholder="xxxx xxxx xxxx xxxx" maxlength="19" required>
-            </div>
-        </div>
-
+         <div class="section-title">ثالثاً: جدية الطلب والاعتماد المالي</div>
+<div class="payment-box">
+    <div class="form-group">
+        <label for="servicePrice">سعر الخدمة (دج):</label>
+        <input type="number" id="servicePrice" name="servicePrice" readonly 
+               style="width: 100%; padding: 10px; background-color: #edf2f7; border: 1px solid #cbd5e0; border-radius: 5px;">
+    </div>
+    
+    <p style="margin: 0 0 10px 0; font-weight: bold; color: #2c5282;">يتطلب تأكيد هذا الطلب دفع عربون جدية مسترد في حال رفض الطلب.</p>
+    <p style="font-size: 1.2rem; margin: 0 0 15px 0; color: #2d3748;">
+        قيمة العربون المستحق: <strong id="depositAmountDisplay" style="color: #e53e3e;">0</strong> دج
+    </p>
+    
+   <div class="form-group" style="margin-bottom: 0;">
+    <label for="cardNumber">رقم البطاقة الذهبية / البطاقة البنكية:</label>
+    <input type="text" id="cardNumber" 
+           placeholder="1234 5678 9012 3456" 
+           maxlength="19" 
+           pattern="\d{4} \d{4} \d{4} \d{4}" 
+           title="يجب إدخال 16 رقماً"
+           required>
+    <small style="color: #718096;">أدخل الأرقام الـ 16 الموجودة على وجه البطاقة.</small>
+</div>
+</div>
         <div style="margin-top: 30px;">
             <button type="submit" class="submit-btn">تأكيد الدفع وإرسال الطلب رسمياً</button>
         </div>
