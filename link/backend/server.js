@@ -4,7 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
-
+const response = await fetch(`/user-info?email=${encodeURIComponent(email)}`);
 const app = express();
 
 /**
