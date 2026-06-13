@@ -272,7 +272,7 @@ function showSection(sectionId) {
  * 8. منطق زر "طلب الخدمة"
  */
 document.addEventListener('click', (e) => {
-    // منطق خاص بزر الصفحة الرئيسية فقط
+    // 1. منطق زر الصفحة الرئيسية (البوابة الذكية)
     if (e.target && e.target.classList.contains('home-hero-btn')) {
         e.preventDefault();
         const btn = e.target;
@@ -282,7 +282,6 @@ document.addEventListener('click', (e) => {
 
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-        // 1. إذا كان مسجلاً (يعود لداشبورد حسابه)
         if (isLoggedIn) {
             const userRole = localStorage.getItem('userRole');
             const paths = { 
@@ -292,21 +291,22 @@ document.addEventListener('click', (e) => {
                 'expert': 'expert-dashboard.html' 
             };
             window.location.href = paths[userRole] || 'login.html';
-        } 
-        // 2. إذا لم يكن مسجلاً (يتم توجيهه لمسار التسجيل)
-        else {
+        } else {
             const wantsToRegister = confirm("للوصول للوحة التحكم، يرجى تسجيل الدخول. \n\n- 'موافق': تسجيل حساب جديد.\n- 'إلغاء': تسجيل الدخول بحساب حالي.");
-            
             if (wantsToRegister) {
                 const isExpert = confirm("هل تود التسجيل كخبير أو محكم؟\n- 'موافق': خبير.\n- 'إلغاء': عميل أو مدير.");
                 window.location.href = isExpert ? 'register-expert.html' : 'register.html';
             } else {
                 window.location.href = 'login.html';
-                // هذا الزر خاص بصفحات الخدمات (service.html)
+            }
+        }
+        return; // خروج من الدالة لأننا قمنا بمعالجة هذا الزر
+    }
+
+    // 2. منطق أزرار الخدمات (صفحة الخدمات) - مستقل تماماً عن الأول
     if (e.target && e.target.classList.contains('service-request-btn')) {
         e.preventDefault();
         
-        // حفظ اسم الخدمة المطلوبة في الذاكرة المؤقتة
         const serviceName = e.target.getAttribute('data-service-name');
         if (serviceName) {
             sessionStorage.setItem('selectedServiceName', serviceName);
@@ -314,26 +314,19 @@ document.addEventListener('click', (e) => {
 
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-        // 1. إذا كان مسجلاً للدخول -> اذهب لملء البيانات
         if (isLoggedIn) {
             window.location.href = 'fill-service-data.html';
-        } 
-        // 2. إذا لم يكن مسجلاً -> نحدد حالته
-        else {
+        } else {
             const userChoice = confirm("لطلب هذه الخدمة، يرجى تسجيل الدخول أو إنشاء حساب.\n\n- 'موافق': لدي حساب (تسجيل دخول).\n- 'إلغاء': أريد إنشاء حساب جديد.");
-
             if (userChoice) {
-                // لديه حساب
                 window.location.href = 'login.html';
             } else {
-                // يريد إنشاء حساب جديد
                 const isExpert = confirm("هل تود التسجيل كخبير أو محكم؟\n- 'موافق': خبير.\n- 'إلغاء': عميل.");
                 window.location.href = isExpert ? 'register-expert.html' : 'register.html';
             }
         }
     }
 });
-
 /**
  * 9. معالجة نموذج طلب الخدمة
  */
