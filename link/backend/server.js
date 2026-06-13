@@ -140,24 +140,6 @@ app.post('/submit-feedback', (req, res) => {
 app.get('/get-feedback', (req, res) => {
     db.all("SELECT * FROM platform_feedback", [], (err, rows) => res.json(rows));
 });
-// هذا المسار هو ما ينتظره ملف script.js ليرد عليه ببيانات المستخدم
-app.get('/user-info', async (req, res) => {
-    const email = req.query.email;
-    
-    // ملاحظة: تأكد من ربط هذا الكود بملف قاعدة بياناتك (JSON أو قاعدة بيانات)
-    // هذا مجرد نموذج: افترض أن لديك مصفوفة تسمى 'users'
-    const user = users.find(u => u.email === email);
-
-    if (user) {
-        // نرسل اسم المستخدم ودوره إلى المتصفح
-        res.json({
-            name: user.name,
-            role: user.role
-        });
-    } else {
-        res.status(404).json({ error: "المستخدم غير موجود" });
-    }
-});
 
 
 /**
@@ -173,6 +155,23 @@ app.get('*', (req, res, next) => {
     if (req.path.includes('.')) {
         return next(); 
     }
+
+    // تأكد من إضافة هذا المسار في server.js لاستقبال الطلبات من المتصفح
+app.get('/user-info', (req, res) => {
+    const userEmail = req.query.email;
+    
+    // استبدل 'users' بقاعدة البيانات أو المصفوفة التي تستخدمها لديك
+    const user = users.find(u => u.email === userEmail); 
+
+    if (user) {
+        res.json({
+            name: user.name,
+            role: user.role
+        });
+    } else {
+        res.status(404).json({ error: "المستخدم غير موجود" });
+    }
+});
 
     const requestedPath = req.params[0].substring(1) || 'index.html';
     
