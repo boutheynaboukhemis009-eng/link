@@ -149,25 +149,33 @@ app.get('/get-feedback', (req, res) => {
 
 
 /**
- * 5. خدمة الملفات الثابتة والصفحات (المسار الشامل)
+ * 5. خدمة الملفات الثابتة والصفحات (الإصدار الصحيح)
  */
+
+// أولاً: التأكد من أن جميع ملفات المجلدات الثابتة (js, css, images) تُقرأ مباشرة
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-app.get('*', (req, res) => {
-    const requestedPath = req.params[0].substring(1); // إزالة أول /
+// ثانياً: مسار الصفحات (بشرط ألا يكون طلباً لملف ثابت مثل js أو css)
+app.get('*', (req, res, next) => {
+    // إذا كان الطلب يحتوي على امتداد (مثل .js أو .css أو .png)، اتركه للمتصفح (لا تلمسه)
+    if (req.path.includes('.')) {
+        return next(); 
+    }
+
+    const requestedPath = req.params[0].substring(1) || 'index.html';
     
-    // 1. محاولة البحث في المسار الرئيسي
+    // محاولة البحث في المسار الرئيسي
     let filePath = path.join(__dirname, '../frontend', requestedPath);
     
-    // 2. إذا لم يجد الملف، محاولة البحث عنه داخل مجلد service-details
+    // إذا لم يجد الملف، محاولة البحث في service-details
     if (!fs.existsSync(filePath)) {
         filePath = path.join(__dirname, '../frontend', 'service-details', requestedPath);
     }
 
-    // 3. إذا وجد الملف أرسله، وإلا أرسل index.html (لدعم SPA أو الروابط الأساسية)
     if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) {
         res.sendFile(filePath);
     } else {
+        // في حالة لم يجد أي ملف، يرجع للرئيسية لدعم صفحات الـ HTML فقط
         res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
     }
 });
