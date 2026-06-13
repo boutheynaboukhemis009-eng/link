@@ -142,17 +142,25 @@ footer {
 .hero-tagline { font-size: 1.5rem; font-weight: bold; color: #333; margin-bottom: 10px; }
 .hero-description { font-size: 1.1rem; color: #555; max-width: 700px; margin: 0 auto 30px; }
 
-.btn-primary { 
-    background-color: var(--gold-bright); 
-    color: #000; 
-    padding: 15px 40px; 
-    text-decoration: none; 
-    font-weight: bold; 
-    border-radius: 8px; 
-    display: inline-block;
-    transition: 0.3s;
+..home-hero-btn {
+    background-color: #c5a059; /* لون ذهبي للمنصة */
+    color: #0f172a;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
 }
-.btn-primary:hover { background-color: var(--gold-primary); transform: scale(1.05); }
+
+.home-hero-btn:hover {
+    background-color: #a88a4a;
+    transform: scale(1.05);
+}
 
 /* تنسيق قسم لماذا تختارنا */
 .why-us { margin-top: 60px; padding: 40px 20px; background: rgba(0,0,0,0.03); border-radius: 15px; }
