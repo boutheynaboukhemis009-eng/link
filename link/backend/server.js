@@ -127,7 +127,7 @@ app.post('/update-order-status', (req, res) => {
 });
 
 // معلومات المستخدم والتقييمات
-script.js:209  GET https://link-p08u.onrender.com/user-info?email=maddar%40gmail.com 404 (Not Found)
+
 
 app.get('/admin-stats', (req, res) => {
     db.get(`SELECT COUNT(*) as count FROM users`, [], (err, row) => res.json({ totalUsers: row.count }));
