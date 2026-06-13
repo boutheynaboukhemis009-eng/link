@@ -1,8 +1,7 @@
 // أضف هذا في بداية ملف script.js
 // اجعل API_URL فارغاً ليعتمد المتصفح على عنوان الموقع الحالي تلقائياً
 const API_URL = ''; 
-    ? 'http://localhost:3000' 
-    : 'https://link-p08u.onrender.com'; // ضع هنا رابط السيرفر الخاص بك على Render
+    
 /**
  * 1. مدير التحميل الذكي (Application Initialization)
  */
