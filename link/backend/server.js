@@ -146,14 +146,26 @@ app.get('/get-feedback', (req, res) => {
     db.all("SELECT * FROM platform_feedback", [], (err, rows) => res.json(rows));
 });
 
+
+
 /**
- * 5. خدمة الملفات والصفحات (يجب أن تأتي في النهاية)
+ * 5. خدمة الملفات الثابتة والصفحات (المسار الشامل)
  */
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-app.get('/:page', (req, res) => {
-    const filePath = path.join(__dirname, '../frontend', req.params.page);
-    if (fs.existsSync(filePath)) {
+app.get('*', (req, res) => {
+    const requestedPath = req.params[0].substring(1); // إزالة أول /
+    
+    // 1. محاولة البحث في المسار الرئيسي
+    let filePath = path.join(__dirname, '../frontend', requestedPath);
+    
+    // 2. إذا لم يجد الملف، محاولة البحث عنه داخل مجلد service-details
+    if (!fs.existsSync(filePath)) {
+        filePath = path.join(__dirname, '../frontend', 'service-details', requestedPath);
+    }
+
+    // 3. إذا وجد الملف أرسله، وإلا أرسل index.html (لدعم SPA أو الروابط الأساسية)
+    if (fs.existsSync(filePath) && fs.lstatSync(filePath).isFile()) {
         res.sendFile(filePath);
     } else {
         res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
