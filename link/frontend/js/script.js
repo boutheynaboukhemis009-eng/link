@@ -1,5 +1,6 @@
 // أضف هذا في بداية ملف script.js
-const API_URL = window.location.hostname === 'localhost' 
+// اجعل API_URL فارغاً ليعتمد المتصفح على عنوان الموقع الحالي تلقائياً
+const API_URL = ''; 
     ? 'http://localhost:3000' 
     : 'https://link-p08u.onrender.com'; // ضع هنا رابط السيرفر الخاص بك على Render
 /**
