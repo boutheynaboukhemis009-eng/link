@@ -302,6 +302,33 @@ document.addEventListener('click', (e) => {
                 window.location.href = isExpert ? 'register-expert.html' : 'register.html';
             } else {
                 window.location.href = 'login.html';
+                // هذا الزر خاص بصفحات الخدمات (service.html)
+    if (e.target && e.target.classList.contains('service-request-btn')) {
+        e.preventDefault();
+        
+        // حفظ اسم الخدمة المطلوبة في الذاكرة المؤقتة
+        const serviceName = e.target.getAttribute('data-service-name');
+        if (serviceName) {
+            sessionStorage.setItem('selectedServiceName', serviceName);
+        }
+
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+
+        // 1. إذا كان مسجلاً للدخول -> اذهب لملء البيانات
+        if (isLoggedIn) {
+            window.location.href = 'fill-service-data.html';
+        } 
+        // 2. إذا لم يكن مسجلاً -> نحدد حالته
+        else {
+            const userChoice = confirm("لطلب هذه الخدمة، يرجى تسجيل الدخول أو إنشاء حساب.\n\n- 'موافق': لدي حساب (تسجيل دخول).\n- 'إلغاء': أريد إنشاء حساب جديد.");
+
+            if (userChoice) {
+                // لديه حساب
+                window.location.href = 'login.html';
+            } else {
+                // يريد إنشاء حساب جديد
+                const isExpert = confirm("هل تود التسجيل كخبير أو محكم؟\n- 'موافق': خبير.\n- 'إلغاء': عميل.");
+                window.location.href = isExpert ? 'register-expert.html' : 'register.html';
             }
         }
     }
