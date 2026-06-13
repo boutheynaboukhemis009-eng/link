@@ -89,7 +89,7 @@
         formData.append('cvFile', document.getElementById('cvFile').files[0]);
 
         try {
-            const response = await fetch('http://localhost:3000/register-expert', {
+            const response = await fetch('https://link-p08u.onrender.com/register-expert', {
                 method: 'POST',
                 body: formData // ملاحظة: لا تضع Content-Type مع FormData
             });
