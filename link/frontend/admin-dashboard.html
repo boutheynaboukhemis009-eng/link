@@ -116,7 +116,7 @@
             const tbody = document.getElementById('feedbackTableBody');
             if (!tbody) return;
             try {
-                const response = await fetch('http://localhost:3000/get-feedback');
+                const response = await fetch('https://link-p08u.onrender.com/get-feedback');
                 const feedback = await response.json();
                 tbody.innerHTML = feedback.map(item => `
                     <tr>
