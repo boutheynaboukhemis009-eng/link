@@ -272,43 +272,37 @@ function showSection(sectionId) {
  * 8. منطق زر "طلب الخدمة"
  */
 document.addEventListener('click', (e) => {
-    if (e.target && e.target.classList.contains('service-request-btn')) {
+    // منطق خاص بزر الصفحة الرئيسية فقط
+    if (e.target && e.target.classList.contains('home-hero-btn')) {
         e.preventDefault();
-        
-        const serviceName = e.target.getAttribute('data-service-name');
-        if (serviceName) {
-            sessionStorage.setItem('selectedServiceName', serviceName);
-        }
+        const btn = e.target;
 
-        // التحقق من مكان وجود المستخدم
-        const currentPage = window.location.pathname;
+        btn.innerText = "جاري التحقق...";
+        btn.style.pointerEvents = "none";
+
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
+        // 1. إذا كان مسجلاً (يعود لداشبورد حسابه)
         if (isLoggedIn) {
-            // الحالة (أ): المستخدم في صفحة الخدمات -> نرسله لملء البيانات
-            if (currentPage.includes('services.html') || currentPage.includes('service.html')) {
-                window.location.href = 'fill-service-data.html';
-            } 
-            // الحالة (ب): المستخدم في أي صفحة أخرى (الرئيسية) -> نرسله للداشبورد
-            else {
-                const userRole = localStorage.getItem('userRole');
-                const paths = { 
-                    'admin': 'admin-dashboard.html', 
-                    'company': 'client-dashboard.html', 
-                    'client': 'client-dashboard.html', 
-                    'expert': 'expert-dashboard.html' 
-                };
-                window.location.href = paths[userRole] || 'login.html';
+            const userRole = localStorage.getItem('userRole');
+            const paths = { 
+                'admin': 'admin-dashboard.html', 
+                'company': 'client-dashboard.html', 
+                'client': 'client-dashboard.html', 
+                'expert': 'expert-dashboard.html' 
+            };
+            window.location.href = paths[userRole] || 'login.html';
+        } 
+        // 2. إذا لم يكن مسجلاً (يتم توجيهه لمسار التسجيل)
+        else {
+            const wantsToRegister = confirm("للوصول للوحة التحكم، يرجى تسجيل الدخول. \n\n- 'موافق': تسجيل حساب جديد.\n- 'إلغاء': تسجيل الدخول بحساب حالي.");
+            
+            if (wantsToRegister) {
+                const isExpert = confirm("هل تود التسجيل كخبير أو محكم؟\n- 'موافق': خبير.\n- 'إلغاء': عميل أو مدير.");
+                window.location.href = isExpert ? 'register-expert.html' : 'register.html';
+            } else {
+                window.location.href = 'login.html';
             }
-            return;
-        }
-
-        // إذا لم يكن مسجلاً للدخول
-        const wantsToJoinAsExpert = confirm("هل تود التسجيل كخبير/محكم في منصتنا؟\n\n- 'موافق' لتسجيل الخبراء.\n- 'إلغاء' للتسجيل كعميل عادي.");
-        if (wantsToJoinAsExpert) {
-            window.location.href = 'register-expert.html';
-        } else {
-            window.location.href = 'register.html';
         }
     }
 });
