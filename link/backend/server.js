@@ -16,10 +16,10 @@ const app = express();
  * 2. إعدادات الـ Middleware
  */
 app.use(cors({
-    origin: 'https://link-p08u.onrender.com', // هذا الرابط هو الذي سيتصل بالسيرفر
+    origin: '*', // السماح بالاتصال من أي مكان لتجنب مشاكل النطاق
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
-    }));
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../frontend')));
 
@@ -299,7 +299,11 @@ app.get('/get-feedback', (req, res) => {
         res.json(rows);
     });
 });
-
+// إضافة دعم لتوجيه أي طلب صفحة (مثل admin-dashboard.html) إلى الملف الصحيح
+app.get('/:page', (req, res) => {
+    const page = req.params.page;
+    res.sendFile(path.join(__dirname, '../frontend', page));
+});
 
 const PORT = process.env.PORT || 3000; // هذا يقرأ المنفذ من السيرفر أو يستخدم 3000 محلياً
 app.listen(PORT, '0.0.0.0', () => {
