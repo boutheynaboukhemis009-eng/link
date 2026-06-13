@@ -315,7 +315,7 @@ document.addEventListener('click', (e) => {
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
         if (isLoggedIn) {
-            window.location.href = 'fill-service-data.html';
+            window.location.href = '/fill-service-data.html';
         } else {
             const userChoice = confirm("لطلب هذه الخدمة، يرجى تسجيل الدخول أو إنشاء حساب.\n\n- 'موافق': لدي حساب (تسجيل دخول).\n- 'إلغاء': أريد إنشاء حساب جديد.");
             if (userChoice) {
