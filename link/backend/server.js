@@ -4,7 +4,7 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const multer = require('multer');
 const fs = require('fs');
-const response = await fetch(`/user-info?email=${encodeURIComponent(email)}`);
+
 const app = express();
 
 /**
@@ -140,7 +140,24 @@ app.post('/submit-feedback', (req, res) => {
 app.get('/get-feedback', (req, res) => {
     db.all("SELECT * FROM platform_feedback", [], (err, rows) => res.json(rows));
 });
+// هذا المسار هو ما ينتظره ملف script.js ليرد عليه ببيانات المستخدم
+app.get('/user-info', async (req, res) => {
+    const email = req.query.email;
+    
+    // ملاحظة: تأكد من ربط هذا الكود بملف قاعدة بياناتك (JSON أو قاعدة بيانات)
+    // هذا مجرد نموذج: افترض أن لديك مصفوفة تسمى 'users'
+    const user = users.find(u => u.email === email);
 
+    if (user) {
+        // نرسل اسم المستخدم ودوره إلى المتصفح
+        res.json({
+            name: user.name,
+            role: user.role
+        });
+    } else {
+        res.status(404).json({ error: "المستخدم غير موجود" });
+    }
+});
 
 
 /**
