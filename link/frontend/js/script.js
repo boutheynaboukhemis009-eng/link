@@ -206,7 +206,7 @@ async function fetchAndDisplayUserInfo() {
     const email = localStorage.getItem('userEmail');
     if (!userNameElement || !email) return;
     try {
-        const response = await fetch(`${API_URL}/user-info?email=${encodeURIComponent(email)}`);
+        const response = await fetch(`/user-info?email=${encodeURIComponent(email)}`);
         if (!response.ok) return;
         const user = await response.json();
         userNameElement.innerText = user.name || "مستخدم";
